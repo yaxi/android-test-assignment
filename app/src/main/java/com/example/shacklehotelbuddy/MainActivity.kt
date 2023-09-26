@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.shacklehotelbuddy.ui.MainScreen
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,39 +28,5 @@ class MainActivity : ComponentActivity() {
                MainScreen()
             }
         }
-    }
-}
-
-@Composable
-fun MainScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .paint(
-                painterResource(id = R.drawable.background),
-                contentScale = ContentScale.FillWidth
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .border(width = 2.dp, color = ShackleHotelBuddyTheme.colors.grayBorder)
-                .background(ShackleHotelBuddyTheme.colors.white)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Hello!",
-                style = ShackleHotelBuddyTheme.typography.bodyMedium,
-                color = ShackleHotelBuddyTheme.colors.grayText
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ShackleHotelBuddyTheme {
-        MainScreen()
     }
 }
