@@ -1,10 +1,14 @@
-package com.example.shacklehotelbuddy
+package com.example.shacklehotelbuddy.search.data
 
+import com.example.shacklehotelbuddy.BuildConfig
 import com.example.shacklehotelbuddy.data.Resource
 import com.example.shacklehotelbuddy.data.database.dao.RecentSearchDao
 import com.example.shacklehotelbuddy.data.mapper.PropertyMapper
 import com.example.shacklehotelbuddy.data.mapper.RecentSearchMapper
 import com.example.shacklehotelbuddy.data.network.ShackleService
+import com.example.shacklehotelbuddy.search.model.DateData
+import com.example.shacklehotelbuddy.search.model.Property
+import com.example.shacklehotelbuddy.search.model.RecentSearch
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import okhttp3.RequestBody.Companion.toRequestBody

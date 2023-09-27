@@ -1,4 +1,4 @@
-package com.example.shacklehotelbuddy
+package com.example.shacklehotelbuddy.search.model
 
 data class RecentSearch(
     val checkInDate: String,

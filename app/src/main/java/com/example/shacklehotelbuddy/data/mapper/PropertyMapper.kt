@@ -1,6 +1,6 @@
 package com.example.shacklehotelbuddy.data.mapper
 
-import com.example.shacklehotelbuddy.Property
+import com.example.shacklehotelbuddy.search.model.Property
 import com.example.shacklehotelbuddy.data.network.dto.PropertyDto
 import javax.inject.Inject
 

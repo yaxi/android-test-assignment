@@ -1,6 +1,6 @@
 package com.example.shacklehotelbuddy.data.mapper
 
-import com.example.shacklehotelbuddy.RecentSearch
+import com.example.shacklehotelbuddy.search.model.RecentSearch
 import com.example.shacklehotelbuddy.data.database.entity.RecentSearchEntity
 import javax.inject.Inject
 

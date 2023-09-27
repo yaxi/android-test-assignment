@@ -1,4 +1,4 @@
-package com.example.shacklehotelbuddy
+package com.example.shacklehotelbuddy.search.model
 
 import com.example.shacklehotelbuddy.data.network.dto.NeighborhoodDto
 import com.example.shacklehotelbuddy.data.network.dto.PropertyImageDto

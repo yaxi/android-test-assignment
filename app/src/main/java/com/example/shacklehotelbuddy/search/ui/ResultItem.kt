@@ -1,4 +1,4 @@
-package com.example.shacklehotelbuddy.ui
+package com.example.shacklehotelbuddy.search.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
