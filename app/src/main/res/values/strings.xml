@@ -13,4 +13,6 @@
     <string name="price_per_night">night</string>
     <string name="action_confirm">Confirm</string>
     <string name="action_cancel">Cancel</string>
+    <string name="search_loading">Fetching search results</string>
+    <string name="action_retry">Retry</string>
 </resources>
