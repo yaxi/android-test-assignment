@@ -68,7 +68,12 @@ import java.util.TimeZone
 
 @Composable
 fun MainScreen(
-    onSearchClicked: () -> Unit
+    onSearchClicked: (
+        checkInDateInMillis: Long,
+        checkOutDateInMillis: Long,
+        adults: Int,
+        children: Int,
+    ) -> Unit,
 ) {
     val viewModel = hiltViewModel<MainViewModel>()
     val state by viewModel.state.collectAsState()
@@ -78,7 +83,12 @@ fun MainScreen(
         onCheckOutPicked = viewModel::onCheckOutPicked,
         onAdultChanged = viewModel::onAdultChanged,
         onChildrenChanged = viewModel::onChildrenChanged,
-        onSearchClicked = onSearchClicked
+        onSearchClicked = {
+            viewModel.onSearchClicked()
+            with(viewModel.currentState()) {
+                onSearchClicked(checkInDateInMillis, checkOutDateInMillis, adults, children)
+            }
+        }
     )
 }
 
@@ -89,7 +99,7 @@ private fun MainScreen(
     onCheckOutPicked: (Long?) -> Unit,
     onAdultChanged: (Int) -> Unit,
     onChildrenChanged: (Int) -> Unit,
-    onSearchClicked: () -> Unit
+    onSearchClicked: () -> Unit,
 ) {
     var showCheckInPicker by remember {
         mutableStateOf(false)
@@ -103,6 +113,50 @@ private fun MainScreen(
     var showChildrenPicker by remember {
         mutableStateOf(false)
     }
+
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+
+    val checkInPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = object: SelectableDates {
+            // block dates that before the current date
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                return utcTimeMillis >= calendar.timeInMillis
+            }
+
+            // block years that before the current year
+            override fun isSelectableYear(year: Int): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                val currentYear = calendar[Calendar.YEAR]
+                return year >= currentYear
+            }
+        }
+    )
+
+    val checkOutPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = object: SelectableDates {
+            // block dates that before the check in date
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return if (checkInPickerState.selectedDateMillis == null) {
+                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    utcTimeMillis >= calendar.timeInMillis
+                } else {
+                    utcTimeMillis >= checkInPickerState.selectedDateMillis!!
+                }
+            }
+
+            // block years that before the current year
+            override fun isSelectableYear(year: Int): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                val currentYear = calendar[Calendar.YEAR]
+                return year >= currentYear
+            }
+        }
+    )
 
     Box(
         modifier = Modifier
@@ -247,56 +301,11 @@ private fun MainScreen(
         }
     }
 
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-
-    val checkInPickerState = rememberDatePickerState(
-        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
-        initialDisplayMode = DisplayMode.Picker,
-        selectableDates = object: SelectableDates {
-            // block dates that before the current date
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                return utcTimeMillis >= calendar.timeInMillis
-            }
-
-            // block years that before the current year
-            override fun isSelectableYear(year: Int): Boolean {
-                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                val currentYear = calendar[Calendar.YEAR]
-                return year >= currentYear
-            }
-        }
-    )
-
-    val checkOutPickerState = rememberDatePickerState(
-        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
-        initialDisplayMode = DisplayMode.Picker,
-        selectableDates = object: SelectableDates {
-            // block dates that before the check in date
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return if (checkInPickerState.selectedDateMillis == null) {
-                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                    utcTimeMillis >= calendar.timeInMillis
-                } else {
-                    utcTimeMillis >= checkInPickerState.selectedDateMillis!!
-                }
-            }
-
-            // block years that before the current year
-            override fun isSelectableYear(year: Int): Boolean {
-                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                val currentYear = calendar[Calendar.YEAR]
-                return year >= currentYear
-            }
-        }
-    )
-
-
     if (showCheckInPicker) {
         SimpleDatePicker(
             datePickerState = checkInPickerState,
             onDismissRequest = {
-               showCheckInPicker = false
+                showCheckInPicker = false
             },
             onConfirm = { date ->
                 onCheckInPicked(date)
@@ -378,7 +387,7 @@ private fun SimpleDatePicker(
     datePickerState: DatePickerState,
     onDismissRequest: () -> Unit,
     onConfirm: (Long?) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     DatePickerDialog(
         onDismissRequest = onDismissRequest,
@@ -405,7 +414,7 @@ private fun SimpleNumberPicker(
     value: Int,
     min: Int = 0,
     max: Int = Int.MAX_VALUE,
-    onValueChange: (Int) -> Unit
+    onValueChange: (Int) -> Unit,
 ) {
     AndroidView(
         modifier = Modifier.fillMaxWidth(),
