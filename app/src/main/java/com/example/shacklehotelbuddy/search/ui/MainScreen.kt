@@ -1,5 +1,6 @@
 package com.example.shacklehotelbuddy.search.ui
 
+import android.widget.NumberPicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,14 +18,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,18 +51,56 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shacklehotelbuddy.R
+import com.example.shacklehotelbuddy.search.MainViewModel
 import com.example.shacklehotelbuddy.search.state.SearchViewState
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun MainScreen(
-    viewState: SearchViewState,
+    onSearchClicked: () -> Unit
 ) {
-    var showDatePicker by remember {
+    val viewModel = hiltViewModel<MainViewModel>()
+    val state by viewModel.state.collectAsState()
+    MainScreen(
+        viewState = state,
+        onCheckInPicked = viewModel::onCheckInPicked,
+        onCheckOutPicked = viewModel::onCheckOutPicked,
+        onAdultChanged = viewModel::onAdultChanged,
+        onChildrenChanged = viewModel::onChildrenChanged,
+        onSearchClicked = onSearchClicked
+    )
+}
+
+@Composable
+private fun MainScreen(
+    viewState: SearchViewState,
+    onCheckInPicked: (Long?) -> Unit,
+    onCheckOutPicked: (Long?) -> Unit,
+    onAdultChanged: (Int) -> Unit,
+    onChildrenChanged: (Int) -> Unit,
+    onSearchClicked: () -> Unit
+) {
+    var showCheckInPicker by remember {
+        mutableStateOf(false)
+    }
+    var showCheckOutPicker by remember {
+        mutableStateOf(false)
+    }
+    var showAdultPicker by remember {
+        mutableStateOf(false)
+    }
+    var showChildrenPicker by remember {
         mutableStateOf(false)
     }
 
@@ -89,76 +135,89 @@ fun MainScreen(
                         iconRes = R.drawable.event_upcoming,
                         titleRes = R.string.title_check_in_date,
                         data = viewState.checkInDate.toString(),
-                        onClick = { showDatePicker = true }
+                        onClick = { showCheckInPicker = true }
                     )
-                    Divider()
+                    HorizontalDivider()
                     SearchDataRow(
                         iconRes = R.drawable.event_available,
                         titleRes = R.string.title_check_out_date,
                         data = viewState.checkOutDate.toString(),
-                        onClick = {}
+                        onClick = { showCheckOutPicker = true }
 
                     )
-                    Divider()
+                    HorizontalDivider()
                     SearchDataRow(
                         iconRes = R.drawable.person,
                         titleRes = R.string.title_adults,
                         data = viewState.adults.toString(),
-                        onClick = {}
+                        onClick = { showAdultPicker = true }
                     )
-                    Divider()
+                    HorizontalDivider()
                     SearchDataRow(
                         iconRes = R.drawable.supervisor_account,
                         titleRes = R.string.title_children,
                         data = viewState.children.toString(),
-                        onClick = {}
+                        onClick = { showChildrenPicker = true }
                     )
                 }
 
             }
 
-            Text(
-                modifier = Modifier.padding(top = 32.dp),
-                text = stringResource(id = R.string.title_recent_searches),
-                style = ShackleHotelBuddyTheme.typography.h6,
-                color = ShackleHotelBuddyTheme.colors.white
-            )
-            Box(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .background(
-                        color = ShackleHotelBuddyTheme.colors.white,
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                ProvideTextStyle(
-                    value = TextStyle(
-                        fontSize = 12.sp,
-                        color = ShackleHotelBuddyTheme.colors.grayText,
-                    ),
+            if (viewState.recentSearch != null) {
+                Text(
+                    modifier = Modifier.padding(top = 32.dp),
+                    text = stringResource(id = R.string.title_recent_searches),
+                    style = ShackleHotelBuddyTheme.typography.h6,
+                    color = ShackleHotelBuddyTheme.colors.white
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(
+                            color = ShackleHotelBuddyTheme.colors.white,
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    ProvideTextStyle(
+                        value = TextStyle(
+                            fontSize = 12.sp,
+                            color = ShackleHotelBuddyTheme.colors.grayText,
+                        ),
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.manage_history),
-                            contentDescription = "recent search icon"
-                        )
-                        DividerVert(
+                        Row(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
-                                .height(48.dp)
-                        )
-                        Text(modifier = Modifier, text = "03 07 / 2024 - 08 / 07 / 2024")
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(text = "1 adult, 0 children")
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.manage_history),
+                                contentDescription = "recent search icon"
+                            )
+                            VerticalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .height(48.dp)
+                            )
+                            Text(text = "${viewState.recentSearch.checkInDate} - ${viewState.recentSearch.checkOutDate}")
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "${
+                                    pluralStringResource(
+                                        id = R.plurals.adult,
+                                        count = viewState.adults
+                                    )
+                                }, ${
+                                    pluralStringResource(
+                                        id = R.plurals.children,
+                                        count = viewState.children
+                                    )
+                                }"
+                            )
+                        }
                     }
                 }
             }
@@ -176,7 +235,8 @@ fun MainScreen(
 
                     .height(60.dp),
                 colors = ButtonDefaults.textButtonColors(),
-                onClick = { /*TODO*/ }) {
+                onClick = onSearchClicked
+            ) {
                 Text(
                     fontSize = 18.sp,
                     color = ShackleHotelBuddyTheme.colors.white,
@@ -187,20 +247,184 @@ fun MainScreen(
         }
     }
 
-    val state = rememberDatePickerState(
-        initialSelectedDateMillis = null,
-        initialDisplayedMonthMillis = null,
-        initialDisplayMode = DisplayMode.Picker
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+
+    val checkInPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = object: SelectableDates {
+            // block dates that before the current date
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                return utcTimeMillis >= calendar.timeInMillis
+            }
+
+            // block years that before the current year
+            override fun isSelectableYear(year: Int): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                val currentYear = calendar[Calendar.YEAR]
+                return year >= currentYear
+            }
+        }
     )
-    if (showDatePicker) {
-        DatePicker(
-            state = state
+
+    val checkOutPickerState = rememberDatePickerState(
+        initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = object: SelectableDates {
+            // block dates that before the check in date
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return if (checkInPickerState.selectedDateMillis == null) {
+                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    utcTimeMillis >= calendar.timeInMillis
+                } else {
+                    utcTimeMillis >= checkInPickerState.selectedDateMillis!!
+                }
+            }
+
+            // block years that before the current year
+            override fun isSelectableYear(year: Int): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                val currentYear = calendar[Calendar.YEAR]
+                return year >= currentYear
+            }
+        }
+    )
+
+
+    if (showCheckInPicker) {
+        SimpleDatePicker(
+            datePickerState = checkInPickerState,
+            onDismissRequest = {
+               showCheckInPicker = false
+            },
+            onConfirm = { date ->
+                onCheckInPicked(date)
+                showCheckInPicker = false
+            },
+            onDismiss = {
+                showCheckInPicker = false
+            }
+        )
+//        DatePickerDialog(
+//            onDismissRequest = { showCheckInPicker = false },
+//            confirmButton = {
+//                TextButton(onClick = { showCheckInPicker = false }) {
+//                    Text(text = stringResource(id = R.string.action_confirm))
+//                }
+//                onCheckInPicked(checkInPickerState.selectedDateMillis)
+//            },
+//            dismissButton = {
+//                TextButton(onClick = { showCheckInPicker = false }) {
+//                    Text(text = stringResource(id = R.string.action_cancel))
+//                }
+//            }
+//        ) {
+//            DatePicker(
+//                state = checkInPickerState
+//            )
+//        }
+    }
+
+    if (showCheckOutPicker) {
+        SimpleDatePicker(
+            datePickerState = checkOutPickerState,
+            onDismissRequest = {
+                showCheckOutPicker = false
+            },
+            onConfirm = { date ->
+                onCheckOutPicked(date)
+                showCheckOutPicker = false
+            },
+            onDismiss = {
+                showCheckOutPicker = false
+            }
+        )
+//        DatePickerDialog(
+//            onDismissRequest = { showCheckOutPicker = false },
+//            confirmButton = {
+//                TextButton(onClick = { showCheckOutPicker = false }) {
+//                    Text(text = stringResource(id = R.string.action_confirm))
+//                }
+//                onCheckOutPicked(checkOutPickerState.selectedDateMillis)
+//            },
+//            dismissButton = {
+//                TextButton(onClick = { showCheckOutPicker = false }) {
+//                    Text(text = stringResource(id = R.string.action_cancel))
+//                }
+//            }
+//        ) {
+//            DatePicker(state = checkOutPickerState)
+//        }
+    }
+
+    if (showAdultPicker) {
+        SimpleNumberPicker(
+            value = viewState.adults,
+            onValueChange = onAdultChanged
+        )
+    }
+
+    if (showChildrenPicker) {
+        SimpleNumberPicker(
+            value = viewState.children,
+            onValueChange = onChildrenChanged
         )
     }
 }
 
 @Composable
-fun SearchDataRow(
+private fun SimpleDatePicker(
+    datePickerState: DatePickerState,
+    onDismissRequest: () -> Unit,
+    onConfirm: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    DatePickerDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm(datePickerState.selectedDateMillis)
+            }) {
+                Text(text = stringResource(id = R.string.action_confirm))
+            }
+
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(id = R.string.action_cancel))
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+@Composable
+private fun SimpleNumberPicker(
+    value: Int,
+    min: Int = 0,
+    max: Int = Int.MAX_VALUE,
+    onValueChange: (Int) -> Unit
+) {
+    AndroidView(
+        modifier = Modifier.fillMaxWidth(),
+        factory = { context ->
+            NumberPicker(context).apply {
+                setOnValueChangedListener { _, oldVal, newVal ->
+                    onValueChange(oldVal)
+                }
+                minValue = min
+                maxValue = max
+                this.value = value
+            }
+        },
+        update = {}
+    )
+}
+
+@Composable
+private fun SearchDataRow(
     modifier: Modifier = Modifier,
     iconRes: Int,
     iconDescription: String? = null,
@@ -244,12 +468,10 @@ fun SearchDataRow(
                     .padding(start = 8.dp),
                 text = stringResource(id = titleRes)
             )
-            DividerVert(
-                modifier = Modifier.constrainAs(dividerRef) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    height = Dimension.value(52.dp)
-                })
+            VerticalDivider(Modifier.constrainAs(dividerRef) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            })
             Text(
                 modifier = Modifier
                     .constrainAs(textFieldRef) {
@@ -265,23 +487,17 @@ fun SearchDataRow(
     }
 }
 
-@Composable
-fun DividerVert(
-    modifier: Modifier = Modifier,
-    thickness: Dp = DividerDefaults.Thickness,
-    color: Color = DividerDefaults.color,
-) {
-    Box(
-        modifier
-            .width(width = thickness)
-            .background(color = color)
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+private fun GreetingPreview() {
     ShackleHotelBuddyTheme {
-        MainScreen()
+        MainScreen(
+            viewState = SearchViewState(),
+            onCheckInPicked = {},
+            onCheckOutPicked = {},
+            onAdultChanged = {},
+            onChildrenChanged = {},
+            onSearchClicked = {}
+        )
     }
 }

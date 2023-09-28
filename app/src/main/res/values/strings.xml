@@ -6,8 +6,11 @@
     <string name="title_adults">Adults</string>
     <string name="title_children">Children</string>
     <string name="title_recent_searches">Recent searches</string>
+    <string name="recent_search_date">%1$s - %2$s</string>
     <string name="action_search">Search</string>
     <string name="title_search_results">Search results</string>
     <string name="placeholder_date">DD / MM / YYYY</string>
     <string name="price_per_night">night</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

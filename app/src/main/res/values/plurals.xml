@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="adult">
+        <item quantity="one">%d adult</item>
+        <item quantity="other">%d adults</item>
+    </plurals>
+    <plurals name="children">
+        <item quantity="one">%d child</item>
+        <item quantity="other">%d children</item>
+    </plurals>
+</resources>
