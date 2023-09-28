@@ -9,5 +9,6 @@ data class Property(
     val name: String,
     val imageUrl: String,
     val neighborhood: String,
-    val ratings: Float
+    val ratings: String,
+    val pricePerNight: String
 )

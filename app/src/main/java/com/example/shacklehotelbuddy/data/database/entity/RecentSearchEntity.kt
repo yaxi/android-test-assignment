@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
     tableName = "recent_searches"
 )
 data class RecentSearchEntity(
-    @PrimaryKey
-    @ColumnInfo(name = "id") val id: String,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id") val id: Long = 0L,
     @ColumnInfo(name = "check_in_date") val checkInDate: String,
     @ColumnInfo(name = "check_out_date") val checkOutDate: String,
     @ColumnInfo(name = "adults") val adults: Int,

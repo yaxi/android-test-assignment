@@ -16,6 +16,8 @@ data class PropertyDto(
     val propertyImage: PropertyImageDto,
     @SerializedName("neighborhood")
     val neighborhood: NeighborhoodDto,
+    @SerializedName("price")
+    val price: PriceDto,
     @SerializedName("reviews")
-    val reviewsDto: ReviewsDto
+    val reviewsDto: ReviewsDto,
 )

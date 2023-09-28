@@ -12,7 +12,8 @@ class PropertyMapper @Inject constructor() {
             name = dto.name,
             imageUrl = dto.propertyImage.image.url,
             neighborhood = dto.neighborhood.name,
-            ratings = dto.reviewsDto.score
+            ratings = String.format("%.1f", dto.reviewsDto.score),
+            pricePerNight = dto.price.lead.formatted
         )
     }
 }
