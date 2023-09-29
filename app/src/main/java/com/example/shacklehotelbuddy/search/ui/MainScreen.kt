@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -26,6 +29,7 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -52,6 +56,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -315,24 +320,6 @@ private fun MainScreen(
                 showCheckInPicker = false
             }
         )
-//        DatePickerDialog(
-//            onDismissRequest = { showCheckInPicker = false },
-//            confirmButton = {
-//                TextButton(onClick = { showCheckInPicker = false }) {
-//                    Text(text = stringResource(id = R.string.action_confirm))
-//                }
-//                onCheckInPicked(checkInPickerState.selectedDateMillis)
-//            },
-//            dismissButton = {
-//                TextButton(onClick = { showCheckInPicker = false }) {
-//                    Text(text = stringResource(id = R.string.action_cancel))
-//                }
-//            }
-//        ) {
-//            DatePicker(
-//                state = checkInPickerState
-//            )
-//        }
     }
 
     if (showCheckOutPicker) {
@@ -349,35 +336,21 @@ private fun MainScreen(
                 showCheckOutPicker = false
             }
         )
-//        DatePickerDialog(
-//            onDismissRequest = { showCheckOutPicker = false },
-//            confirmButton = {
-//                TextButton(onClick = { showCheckOutPicker = false }) {
-//                    Text(text = stringResource(id = R.string.action_confirm))
-//                }
-//                onCheckOutPicked(checkOutPickerState.selectedDateMillis)
-//            },
-//            dismissButton = {
-//                TextButton(onClick = { showCheckOutPicker = false }) {
-//                    Text(text = stringResource(id = R.string.action_cancel))
-//                }
-//            }
-//        ) {
-//            DatePicker(state = checkOutPickerState)
-//        }
     }
 
     if (showAdultPicker) {
         SimpleNumberPicker(
             value = viewState.adults,
-            onValueChange = onAdultChanged
+            onValueChange = onAdultChanged,
+            onDismissRequest = { showAdultPicker = false }
         )
     }
 
     if (showChildrenPicker) {
         SimpleNumberPicker(
             value = viewState.children,
-            onValueChange = onChildrenChanged
+            onValueChange = onChildrenChanged,
+            onDismissRequest = { showChildrenPicker = false }
         )
     }
 }
@@ -411,25 +384,41 @@ private fun SimpleDatePicker(
 
 @Composable
 private fun SimpleNumberPicker(
+    modifier: Modifier = Modifier,
     value: Int,
     min: Int = 0,
-    max: Int = Int.MAX_VALUE,
+    max: Int = 100,
     onValueChange: (Int) -> Unit,
+    onDismissRequest: () -> Unit
 ) {
-    AndroidView(
-        modifier = Modifier.fillMaxWidth(),
-        factory = { context ->
-            NumberPicker(context).apply {
-                setOnValueChangedListener { _, oldVal, newVal ->
-                    onValueChange(oldVal)
-                }
-                minValue = min
-                maxValue = max
-                this.value = value
-            }
-        },
-        update = {}
-    )
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier.wrapContentHeight(),
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .requiredWidth(356.dp)
+                .heightIn(max = 568.dp),
+            shape = RoundedCornerShape(28.0.dp),
+            tonalElevation = 6.dp,
+        ) {
+            AndroidView(
+                modifier = Modifier.fillMaxWidth(),
+                factory = { context ->
+                    NumberPicker(context).apply {
+                        setOnValueChangedListener { _, _, newVal ->
+                            onValueChange(newVal)
+                        }
+                        minValue = min
+                        maxValue = max
+                        this.value = value
+                    }
+                },
+                update = {}
+            )
+        }
+    }
 }
 
 @Composable
@@ -444,7 +433,9 @@ private fun SearchDataRow(
     ProvideTextStyle(
         value = TextStyle(
             color = ShackleHotelBuddyTheme.colors.grayText,
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            fontWeight = FontWeight(450),
+            lineHeight = 20.sp
         )
     ) {
         ConstraintLayout(
@@ -485,10 +476,10 @@ private fun SearchDataRow(
                 modifier = Modifier
                     .constrainAs(textFieldRef) {
                         start.linkTo(midGuide)
-                        end.linkTo(parent.end)
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
                     }
+                    .padding(start = 16.dp)
                     .clickable(enabled = true, onClick = onClick),
                 text = data
             )
