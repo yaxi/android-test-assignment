@@ -69,7 +69,11 @@ fun NavigationRoutes(
             navArgument(Constants.ParamKey.KEY_CHILDREN) {
                 type = NavType.StringType
             }
-            ResultScreen()
+            ResultScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

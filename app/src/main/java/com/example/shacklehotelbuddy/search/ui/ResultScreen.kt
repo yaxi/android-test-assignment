@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
@@ -26,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shacklehotelbuddy.R
 import com.example.shacklehotelbuddy.search.ResultScreenViewModel
@@ -54,72 +58,84 @@ private fun ResultScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             Modifier
-                .padding(start = 16.dp, end = 16.dp)
+                .fillMaxSize()
         ) {
-            Row(
-                Modifier
+            ConstraintLayout(
+                modifier = Modifier
                     .fillMaxWidth()
+                    .wrapContentHeight(),
             ) {
-                OutlinedIconButton(onClick = onBack) {
+                val (iconRef, titleRef) = createRefs()
+                IconButton(modifier = Modifier.constrainAs(iconRef) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                }, onClick = onBack) {
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_back),
                         contentDescription = "back button"
                     )
                 }
                 Text(
-                    modifier = Modifier.weight(1f),
-                    text = stringResource(id = R.string.title_search_results)
+                    modifier = Modifier.constrainAs(titleRef) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                    text = stringResource(id = R.string.title_search_results),
+                    style = ShackleHotelBuddyTheme.typography.h5
                 )
             }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-            ) {
-                itemsIndexed(items = viewState.results) { index, item ->
-                    ResultItem(
-                        imageUrl = item.imageUrl,
-                        hotelName = item.name,
-                        hotelRating = item.ratings,
-                        location = item.neighborhood,
-                        pricePerNight = item.pricePerNight
-                    )
-                }
-            }
-        }
-
-        if (viewState.error != null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp)
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    Modifier.padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = viewState.error.localizedMessage!!)
-                    TextButton(onClick = onRetry) {
-                        Text(text = stringResource(id = R.string.action_retry))
+                if (viewState.results.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+                        itemsIndexed(items = viewState.results) { index, item ->
+                            Spacer(modifier = Modifier.height(32.dp))
+                            ResultItem(
+                                imageUrl = item.imageUrl,
+                                hotelName = item.name,
+                                hotelRating = item.ratings,
+                                location = item.neighborhood,
+                                pricePerNight = item.pricePerNight
+                            )
+                        }
+                    }
+                }
+                if (viewState.error != null) {
+                    Column(
+                        Modifier.padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = viewState.error.localizedMessage!!)
+                        TextButton(onClick = onRetry) {
+                            Text(text = stringResource(id = R.string.action_retry))
+                        }
+                    }
+                }
+
+                if (viewState.isLoading) {
+                    Column(
+                        Modifier.padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = stringResource(id = R.string.search_loading))
+                        LinearProgressIndicator(
+                            modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 8.dp)
+                        )
                     }
                 }
             }
         }
 
-        if (viewState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    Modifier.padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = stringResource(id = R.string.search_loading))
-                    LinearProgressIndicator(
-                        modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 8.dp)
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -129,7 +145,8 @@ fun ResultScreenPreviewLoading() {
     ShackleHotelBuddyTheme {
         ResultScreen(
             viewState = SearchResultViewState(isLoading = true),
-            onRetry = {}
+            onRetry = {},
+            onBack = {}
         )
     }
 }
@@ -140,7 +157,8 @@ fun ResultScreenPreviewError() {
     ShackleHotelBuddyTheme {
         ResultScreen(
             viewState = SearchResultViewState(error = Throwable("Some Error")),
-            onRetry = {}
+            onRetry = {},
+            onBack = {}
         )
     }
 }

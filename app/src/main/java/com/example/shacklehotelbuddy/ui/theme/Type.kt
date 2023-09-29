@@ -23,6 +23,13 @@ data class CustomTypography constructor(
         lineHeight = 48.sp,
         letterSpacing = 0.5.sp
     ),
+    val h5: TextStyle = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight(450),
+        fontSize = 18.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.5.sp
+    ),
     val h6: TextStyle = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight(450),
