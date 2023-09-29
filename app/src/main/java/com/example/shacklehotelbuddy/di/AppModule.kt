@@ -1,7 +1,7 @@
 package com.example.shacklehotelbuddy.di
 
 import android.content.Context
-import com.example.shacklehotelbuddy.CoroutineDispatchers
+import com.example.shacklehotelbuddy.util.CoroutineDispatchers
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

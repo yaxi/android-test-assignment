@@ -7,7 +7,6 @@ import com.example.shacklehotelbuddy.data.database.entity.RecentSearchEntity
 import com.example.shacklehotelbuddy.data.mapper.PropertyMapper
 import com.example.shacklehotelbuddy.data.mapper.RecentSearchMapper
 import com.example.shacklehotelbuddy.data.network.ShackleService
-import com.example.shacklehotelbuddy.search.model.DateData
 import com.example.shacklehotelbuddy.search.model.Property
 import com.example.shacklehotelbuddy.search.model.RecentSearch
 import com.google.gson.JsonArray

@@ -24,8 +24,6 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SelectableDates
@@ -43,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -52,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -61,18 +57,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shacklehotelbuddy.R
-import com.example.shacklehotelbuddy.search.MainViewModel
+import com.example.shacklehotelbuddy.search.SearchScreenViewModel
 import com.example.shacklehotelbuddy.search.state.SearchViewState
 import com.example.shacklehotelbuddy.ui.theme.ShackleHotelBuddyTheme
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
 @Composable
-fun MainScreen(
+fun SearchScreen(
     onSearchClicked: (
         checkInDateInMillis: Long,
         checkOutDateInMillis: Long,
@@ -80,9 +74,9 @@ fun MainScreen(
         children: Int,
     ) -> Unit,
 ) {
-    val viewModel = hiltViewModel<MainViewModel>()
+    val viewModel = hiltViewModel<SearchScreenViewModel>()
     val state by viewModel.state.collectAsState()
-    MainScreen(
+    SearchScreen(
         viewState = state,
         onCheckInPicked = viewModel::onCheckInPicked,
         onCheckOutPicked = viewModel::onCheckOutPicked,
@@ -93,18 +87,34 @@ fun MainScreen(
             with(viewModel.currentState()) {
                 onSearchClicked(checkInDateInMillis, checkOutDateInMillis, adults, children)
             }
+        },
+        onRecentSearchClick = {
+            viewModel.currentState().recentSearch?.let {
+                val sdf = getFormatter()
+                val checkInMillis = sdf.parse(it.checkInDate)?.time
+                val checkOutMillis = sdf.parse(it.checkOutDate)?.time
+                if (checkInMillis != null && checkOutMillis != null) {
+                    onSearchClicked(
+                        checkInMillis,
+                        checkOutMillis,
+                        it.adults,
+                        it.children
+                    )
+                }
+            }
         }
     )
 }
 
 @Composable
-private fun MainScreen(
+private fun SearchScreen(
     viewState: SearchViewState,
     onCheckInPicked: (Long?) -> Unit,
     onCheckOutPicked: (Long?) -> Unit,
     onAdultChanged: (Int) -> Unit,
     onChildrenChanged: (Int) -> Unit,
     onSearchClicked: () -> Unit,
+    onRecentSearchClick: () -> Unit
 ) {
     var showCheckInPicker by remember {
         mutableStateOf(false)
@@ -119,7 +129,7 @@ private fun MainScreen(
         mutableStateOf(false)
     }
 
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+    val sdf = getFormatter()
 
     val checkInPickerState = rememberDatePickerState(
         initialSelectedDateMillis = sdf.parse(viewState.checkInDate)?.time,
@@ -237,8 +247,9 @@ private fun MainScreen(
                         .background(
                             color = ShackleHotelBuddyTheme.colors.white,
                             shape = RoundedCornerShape(8.dp)
-                        ),
-                    contentAlignment = Alignment.CenterStart
+                        )
+                        .clickable(onClick = onRecentSearchClick),
+                    contentAlignment = Alignment.CenterStart,
                 ) {
                     ProvideTextStyle(
                         value = TextStyle(
@@ -267,12 +278,14 @@ private fun MainScreen(
                                 text = "${
                                     pluralStringResource(
                                         id = R.plurals.adult,
-                                        count = viewState.adults
+                                        count = viewState.recentSearch.adults,
+                                        viewState.recentSearch.adults
                                     )
                                 }, ${
                                     pluralStringResource(
                                         id = R.plurals.children,
-                                        count = viewState.children
+                                        count = viewState.recentSearch.children,
+                                        viewState.recentSearch.children
                                     )
                                 }"
                             )
@@ -487,17 +500,22 @@ private fun SearchDataRow(
     }
 }
 
+private fun getFormatter(): SimpleDateFormat {
+    return SimpleDateFormat("dd/MM/yyyy", Locale.US)
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun GreetingPreview() {
     ShackleHotelBuddyTheme {
-        MainScreen(
+        SearchScreen(
             viewState = SearchViewState(),
             onCheckInPicked = {},
             onCheckOutPicked = {},
             onAdultChanged = {},
             onChildrenChanged = {},
-            onSearchClicked = {}
+            onSearchClicked = {},
+            onRecentSearchClick = {}
         )
     }
 }

@@ -2,8 +2,8 @@ package com.example.shacklehotelbuddy.search
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.example.shacklehotelbuddy.Constants
-import com.example.shacklehotelbuddy.CoroutineDispatchers
+import com.example.shacklehotelbuddy.util.Constants
+import com.example.shacklehotelbuddy.util.CoroutineDispatchers
 import com.example.shacklehotelbuddy.data.Resource
 import com.example.shacklehotelbuddy.search.data.SearchRepository
 import com.example.shacklehotelbuddy.search.state.SearchResultViewState

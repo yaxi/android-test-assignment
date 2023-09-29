@@ -1,9 +1,7 @@
 package com.example.shacklehotelbuddy.search.state
 
-import com.example.shacklehotelbuddy.search.model.DateData
 import com.example.shacklehotelbuddy.search.model.RecentSearch
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 

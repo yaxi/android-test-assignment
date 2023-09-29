@@ -1,7 +1,7 @@
 package com.example.shacklehotelbuddy.di
 
 import com.example.shacklehotelbuddy.BuildConfig
-import com.example.shacklehotelbuddy.Constants
+import com.example.shacklehotelbuddy.util.Constants
 import com.example.shacklehotelbuddy.data.network.ShackleService
 import dagger.Module
 import dagger.Provides

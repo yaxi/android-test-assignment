@@ -1,16 +1,13 @@
 package com.example.shacklehotelbuddy.navigation
 
-import android.health.connect.datatypes.SexualActivityRecord
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.shacklehotelbuddy.Constants
-import com.example.shacklehotelbuddy.navigation.Routes.Search.route
-import com.example.shacklehotelbuddy.search.ui.MainScreen
+import com.example.shacklehotelbuddy.util.Constants
+import com.example.shacklehotelbuddy.search.ui.SearchScreen
 import com.example.shacklehotelbuddy.search.ui.ResultScreen
 
 sealed class Routes(val route: String) {
@@ -42,7 +39,7 @@ fun NavigationRoutes(
         composable(
             route = Routes.Search.createRoute()
         ) {
-            MainScreen(onSearchClicked = { checkInMillis, checkoutMillis, adults, children ->
+            SearchScreen(onSearchClicked = { checkInMillis, checkoutMillis, adults, children ->
                 navController.navigate(
                     route = Routes.Result.createRoute(
                         checkInMillis,

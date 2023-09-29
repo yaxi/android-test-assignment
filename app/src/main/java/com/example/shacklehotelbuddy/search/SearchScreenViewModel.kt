@@ -1,24 +1,18 @@
 package com.example.shacklehotelbuddy.search
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.shacklehotelbuddy.CoroutineDispatchers
+import com.example.shacklehotelbuddy.util.CoroutineDispatchers
 import com.example.shacklehotelbuddy.search.data.SearchRepository
-import com.example.shacklehotelbuddy.search.model.DateData
 import com.example.shacklehotelbuddy.search.state.SearchViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class SearchScreenViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val repository: SearchRepository,
 ): ReduxViewModel<SearchViewState>(SearchViewState()) {

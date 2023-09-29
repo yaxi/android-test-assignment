@@ -1,4 +1,4 @@
-package com.example.shacklehotelbuddy
+package com.example.shacklehotelbuddy.util
 
 import kotlinx.coroutines.CoroutineDispatcher
 
